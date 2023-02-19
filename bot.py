@@ -2,8 +2,11 @@ import os
 import time
 import googleapiclient.discovery
 from mastodon import Mastodon
+from dotenv import load_dotenv
 
+load_dotenv()
 epoch_sec = 10800 #checks every three hour
+channel_id = "UC2e4Ukj5Pfr7cb3KpJAFBdQ"
 
 mastodon = Mastodon(
     access_token = 'token.secret',
@@ -13,14 +16,14 @@ mastodon = Mastodon(
 def retrieve_videos():
     api_service_name = "youtube"
     api_version = "v3"
-    DEVELOPER_KEY = "AIzaSyCCBCiQ26pPnCcUV0S0QBGDq7E0R5_q2Cw"
+    DEVELOPER_KEY = os.getenv('DEVELOPER_KEY')
 
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey = DEVELOPER_KEY)
 
     request = youtube.search().list(
         part="id,snippet",
-        channelId="UC2e4Ukj5Pfr7cb3KpJAFBdQ",
+        channelId=channel_id,
         maxResults=10,
         order="date"
     )
