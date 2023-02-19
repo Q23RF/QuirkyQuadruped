@@ -60,6 +60,7 @@ def main():
     videos = retrieve_videos()
     new_videos = compare_time(time.time(), videos)
     toot_update(new_videos)
+    mastodon.status_post("done updating")
 
 if __name__ == "__main__":
     main()
