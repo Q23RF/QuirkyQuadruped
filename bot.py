@@ -3,8 +3,7 @@ import time
 import googleapiclient.discovery
 from mastodon import Mastodon
 
-#epoch_sec = 10800 #checks every three hour
-epoch_sec = 259200 #checks the past three days
+epoch_sec = 10800 #checks every three hour
 
 mastodon = Mastodon(
     access_token = 'token.secret',
