@@ -1,0 +1,9 @@
+name: Auto
+ rule: "'0 /3 * * *'"
+ job: |
+  if (!sch_g.terminal) {
+   sch_g.terminal = vscode.window.createTerminal('test terminal');
+  }
+  sch_g.terminal.show();
+  sch_g.terminal.sendText('& C:/Users/user/AppData/Local/Programs/Python/Python310/python.exe d:/coding/QuirkyQuadruped/bot.py');
+  sch_g.terminal.dispose();
