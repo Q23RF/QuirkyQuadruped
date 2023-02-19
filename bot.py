@@ -3,12 +3,15 @@ import time
 import googleapiclient.discovery
 from mastodon import Mastodon
 
+#epoch_sec = 10800 #checks every three hour
+epoch_sec = 259200 #checks the past three days
+
 mastodon = Mastodon(
     access_token = 'token.secret',
     api_base_url = 'https://botsin.space/'
 )
 
-def retrieve_new_videos():
+def retrieve_videos():
     api_service_name = "youtube"
     api_version = "v3"
     DEVELOPER_KEY = "AIzaSyCCBCiQ26pPnCcUV0S0QBGDq7E0R5_q2Cw"
@@ -17,7 +20,7 @@ def retrieve_new_videos():
         api_service_name, api_version, developerKey = DEVELOPER_KEY)
 
     request = youtube.search().list(
-        part="snippet",
+        part="id,snippet",
         channelId="UC2e4Ukj5Pfr7cb3KpJAFBdQ",
         maxResults=10,
         order="date"
@@ -25,20 +28,36 @@ def retrieve_new_videos():
     videos = request.execute()["items"]
     return videos
 
-def compare_time(videos):
+def compare_time(now, videos):
+    new_videos = []
     for video in videos:
-        publish_time = iso_to_struct(video["snippet"]["publishTime"])
+        publish_time = iso_to_sec(video["snippet"]["publishTime"]) #this seems to be UTC?
+        if now - publish_time < epoch_sec:
+            new_videos.append(video)
+    return new_videos
 
-def toot_update():
-    txt=""
-    mastodon.status_post(txt)
+
+def toot_update(videos):
+    for video in videos:
+        iso_time = video["snippet"]["publishTime"]
+        publish_time = iso_time[0:10] + " " + iso_time[11:19] + " UTC"
+        title = video["snippet"]["title"]
+        v_id = video["id"]["videoId"]
+        url = "https://www.youtube.com/watch?v=" + v_id
+        txt=f"{publish_time} YouTube(@ATEEZofficial) update\n{title}\n{url}"
+        mastodon.status_post(txt)
 
 def iso_to_struct(iso):
     return time.strptime(iso, "%Y-%m-%dT%H:%M:%SZ")
 
+def iso_to_sec(iso):
+    return time.mktime(time.strptime(iso, "%Y-%m-%dT%H:%M:%SZ"))
+
 
 def main():
-    print(iso_to_struct("2023-02-18T03:00:09Z"))
+    videos = retrieve_videos()
+    new_videos = compare_time(time.time(), videos)
+    toot_update(new_videos)
 
 if __name__ == "__main__":
     main()
